@@ -1,0 +1,59 @@
+//create a user
+POST http://localhost:5000/users
+Content-Type: application/json
+
+{
+    "name": "Indah",
+    "email": "indah@gmail.com",
+    "password": "123456",
+    "confPassword": "123456",
+    "role": "user"
+}
+###
+//get ALL users
+GET http://localhost:5000/users
+###
+//get single user
+GET http://localhost:5000/users/dc0a13f3-8040-4c0d-acbb-6e9c59156c0e
+
+###
+//update user
+PATCH  http://localhost:5000/users/dc0a13f3-8040-4c0d-acbb-6e9c59156c0e
+Content-Type: application/json
+
+{
+    "name": "Ray updated",
+    "email": "Ray@gmail.com",
+    "password": "123456",
+    "confPassword": "123456",
+    "role": "admin"
+}
+###
+// delete user 
+DELETE http://localhost:5000/users/fce886b0-4a4b-4837-b016-dd77373bd028
+
+###
+// login user
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+    "email": "indah@gmail.com",
+    "password": "123456"
+}
+###
+// login admin
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+    "email": "ray@gmail.com",
+    "password": "123456"
+}
+###
+//end pont me
+GET http://localhost:5000/me
+
+###
+//logout
+DELETE  http://localhost:5000/logout
