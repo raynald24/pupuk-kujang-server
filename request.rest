@@ -3,8 +3,8 @@ POST http://localhost:5000/users
 Content-Type: application/json
 
 {
-    "name": "Indah",
-    "email": "indah@gmail.com",
+    "name": " alex",
+    "email": "alex@gmail.com",
     "password": "123456",
     "confPassword": "123456",
     "role": "user"
@@ -57,3 +57,41 @@ GET http://localhost:5000/me
 ###
 //logout
 DELETE  http://localhost:5000/logout
+
+### get all sample
+GET http://localhost:5000/samples
+
+### create sample
+POST http://localhost:5000/samples
+Content-Type: application/json
+
+{
+  "namaUnitPemohon": "Unit C",
+  "tanggalSurat": "2025-04-08",
+  "namaBahan": "Clay",
+  "nomorPO": "PO12345",
+  "nomorSurat": "Sufvbjsngvfs",
+  "status": "pending"
+}
+### get id sample
+GET http://localhost:5000/samples/ae00264d-2acf-4aa0-bb80-e98a2a9700e3
+
+### update sample
+PATCH http://localhost:5000/samples/ae00264d-2acf-4aa0-bb80-e98a2a9700e3
+Content-Type: application/json
+
+{
+  "namaUnitPemohon": "Unit A",
+  "tanggalSurat": "2025-04-08",
+  "namaBahan": "sdds X",
+  "nomorPO": "13271hjnjknkcwq",
+  "nomorSurat": "hwsfffffbsbb",
+  "status": "pending"
+}
+###
+// delete Sample 
+DELETE http://localhost:5000/samples/ae00264d-2acf-4aa0-bb80-e98a2a9700e3
+
+###
+//cek API get sample count 
+GET http://localhost:5000/samples/count
