@@ -7,7 +7,12 @@ import dotenv from "dotenv";
 import UserROute from './routes/UserROute.js';  
 import AuthRoute from "./routes/AuthRoute.js";
 import SampleRoute from './routes/SampleRoute.js';  
+import AnalisisRoute from './routes/AnalisisRoute.js'
 import Sample from './models/SampleModel.js';  
+import namaBahan from './models/namaBahan.js';  
+import Parameter from './models/parameters.js';     
+import AnalysisResult from "./models/AnalysisResult.js";
+import ParameterInput from "./models/ParameterInput.js";
 
 dotenv.config();
 
@@ -24,7 +29,7 @@ const store = new sessionStore({
     try {
         await db.authenticate();
         console.log("Database connected!");
-        await Sample.sync(); // Mengsinkronisasi model Sample dengan database
+        await db.sync({ alter: true }); // Mengsinkronisasi model Sample dengan database
         console.log("Database synced!");
     } catch (error) {
         console.error("Error syncing database:", error);
@@ -53,6 +58,7 @@ app.use(express.json());
 app.use(UserROute);  // Rute untuk users
 app.use(AuthRoute);   // Rute untuk auth
 app.use(SampleRoute);  // Rute untuk sample
+app.use(AnalisisRoute);  // Rute untuk Analis
 
 // Start server
 const PORT = process.env.APP_PORT || 5000;

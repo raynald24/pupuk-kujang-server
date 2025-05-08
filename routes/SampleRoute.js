@@ -8,6 +8,7 @@ import {
     getSampleCounts
 } from '../controllers/Sample.js';
 import { verifyUser } from '../middleware/AuthUser.js';
+import { getNamaBahan } from '../controllers/namaBahan.js';
 
 const router = express.Router();
 
@@ -19,6 +20,6 @@ router.post('/samples', verifyUser, createSample);
 router.patch('/samples/:id', verifyUser, updateSample);
 router.delete('/samples/:id', verifyUser, deleteSample);
 
-
+router.get('/namaBahan', getNamaBahan);
 
 export default router;

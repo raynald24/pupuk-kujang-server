@@ -1,19 +1,27 @@
 import Sample from "../models/SampleModel.js";
 import User from "../models/UserModel.js";
+import namaBahan from "../models/namaBahan.js"; // Import namaBahan model
 import { Op } from "sequelize";
 
 // Get All Samples
 export const getSamples = async (req, res) => {
     try {
         const response = await Sample.findAll({
-            attributes: ['uuid', 'namaUnitPemohon', 'tanggalSurat', 'namaBahan', 'nomorPO', 'nomorSurat', 'status'],
-            include: [{
-                model: User,
-                attributes: ['name', 'email']
-            }]
+            attributes: ['uuid', 'namaUnitPemohon', 'tanggalSurat', 'nomorPO', 'nomorSurat', 'status', 'noKendaraan', 'isiBerat', 'jumlahContoh', 'noKodeContoh', 'noSuratPOK'],
+            include: [
+                {
+                    model: User,
+                    attributes: ['name', 'email']
+                },
+                {
+                    model: namaBahan,  // Menambahkan relasi dengan namaBahan
+                    attributes: ['namaBahan'] // Mengambil namaBahan dari tabel namaBahan
+                }
+            ]
         });
         res.status(200).json(response);
     } catch (error) {
+        console.error("Error fetching samples:", error);
         res.status(500).json({ msg: error.message });
     }
 };
@@ -22,45 +30,63 @@ export const getSamples = async (req, res) => {
 export const getSampleById = async (req, res) => {
     try {
         const sample = await Sample.findOne({
-            where: {
-                uuid: req.params.id
-            }
+            where: { uuid: req.params.id }
         });
         if (!sample) return res.status(404).json({ msg: "Sample not found" });
 
         const response = await Sample.findOne({
-            attributes: ['uuid', 'namaUnitPemohon', 'tanggalSurat', 'namaBahan', 'nomorPO', 'nomorSurat', 'status'],
-            where: {
-                id: sample.id
-            },
-            include: [{
-                model: User,
-                attributes: ['name', 'email']
-            }]
+            attributes: ['uuid', 'namaUnitPemohon', 'tanggalSurat', 'nomorPO', 'nomorSurat', 'status', 'noKendaraan', 'isiBerat', 'jumlahContoh', 'noKodeContoh', 'noSuratPOK'],
+            where: { id: sample.id },
+            include: [
+                {
+                    model: User,
+                    attributes: ['name', 'email']
+                },
+                {
+                    model: namaBahan, // Menambahkan relasi dengan namaBahan
+                    attributes: ['namaBahan'] // Mengambil namaBahan dari tabel namaBahan
+                }
+            ]
         });
 
         res.status(200).json(response);
     } catch (error) {
+        console.error("Error fetching sample by ID:", error);
         res.status(500).json({ msg: error.message });
     }
 };
 
 // Create Sample
 export const createSample = async (req, res) => {
-    const { namaUnitPemohon, tanggalSurat, namaBahan, nomorPO, nomorSurat, status } = req.body;
+    const { namaUnitPemohon, tanggalSurat, namaBahanId, nomorPO, nomorSurat, status, noKendaraan, isiBerat, jumlahContoh, noKodeContoh, noSuratPOK } = req.body;
 
     try {
+        // Validasi apakah namaBahanId valid
+        const validNamaBahan = await namaBahan.findOne({ where: { id: namaBahanId } });
+
+        if (!validNamaBahan) {
+            return res.status(400).json({ msg: "Invalid namaBahanId" });
+        }
+
+        // Buat sample baru
         const newSample = await Sample.create({
             namaUnitPemohon,
             tanggalSurat,
-            namaBahan,
+            namaBahanId,  // Menggunakan namaBahanId
             nomorPO,
             nomorSurat,
             status,
-            userId: req.userId // Mengaitkan sample dengan pengguna yang sedang login
+            noKendaraan,  // Store the new fields
+            isiBerat,
+            jumlahContoh,
+            noKodeContoh,
+            noSuratPOK,
+            userId: req.userId  // Mengaitkan sample dengan pengguna yang sedang login
         });
+
         res.status(201).json({ msg: "Sample created successfully" });
     } catch (error) {
+        console.error("Error creating sample:", error);
         res.status(500).json({ msg: error.message });
     }
 };
@@ -68,26 +94,44 @@ export const createSample = async (req, res) => {
 // Update Sample
 export const updateSample = async (req, res) => {
     try {
-        const sample = await Sample.findOne({
-            where: {
-                uuid: req.params.id
-            }
-        });
+        const sample = await Sample.findOne({ where: { uuid: req.params.id } });
         if (!sample) return res.status(404).json({ msg: "Sample not found" });
 
-        const { namaUnitPemohon, tanggalSurat, namaBahan, nomorPO, nomorSurat, status } = req.body;
+        const { namaUnitPemohon, tanggalSurat, namaBahanId, nomorPO, nomorSurat, status, noKendaraan, isiBerat, jumlahContoh, noKodeContoh, noSuratPOK } = req.body;
 
-        // Admin bisa mengupdate sample milik siapa saja
+        // Admin can update any sample
         if (req.role === "admin") {
-            await Sample.update({ namaUnitPemohon, tanggalSurat, namaBahan, nomorPO, nomorSurat, status }, {
-                where: {
-                    id: sample.id
-                }
+            await Sample.update({
+                namaUnitPemohon,
+                tanggalSurat,
+                namaBahanId,
+                nomorPO,
+                nomorSurat,
+                status,
+                noKendaraan,
+                isiBerat,
+                jumlahContoh,
+                noKodeContoh,
+                noSuratPOK
+            }, {
+                where: { id: sample.id }
             });
         } else {
-            // Pengguna hanya bisa mengupdate sample miliknya sendiri
+            // User can only update their own sample
             if (req.userId !== sample.userId) return res.status(403).json({ msg: "Forbidden access" });
-            await Sample.update({ namaUnitPemohon, tanggalSurat, namaBahan, nomorPO, nomorSurat, status }, {
+            await Sample.update({
+                namaUnitPemohon,
+                tanggalSurat,
+                namaBahanId,
+                nomorPO,
+                nomorSurat,
+                status,
+                noKendaraan,
+                isiBerat,
+                jumlahContoh,
+                noKodeContoh,
+                noSuratPOK
+            }, {
                 where: {
                     [Op.and]: [{ id: sample.id }, { userId: req.userId }]
                 }
@@ -95,6 +139,7 @@ export const updateSample = async (req, res) => {
         }
         res.status(200).json({ msg: "Sample updated successfully" });
     } catch (error) {
+        console.error("Error updating sample:", error);
         res.status(500).json({ msg: error.message });
     }
 };
@@ -102,14 +147,13 @@ export const updateSample = async (req, res) => {
 // Delete Sample
 export const deleteSample = async (req, res) => {
     try {
-        const sample = await Sample.findOne({
-            where: { uuid: req.params.id }
-        });
+        const sample = await Sample.findOne({ where: { uuid: req.params.id } });
         if (!sample) return res.status(404).json({ msg: "Sample not found" });
 
         await sample.destroy();
         res.status(200).json({ msg: "Sample deleted successfully" });
     } catch (error) {
+        console.error("Error deleting sample:", error);
         res.status(500).json({ msg: error.message });
     }
 };
@@ -117,23 +161,13 @@ export const deleteSample = async (req, res) => {
 // Get Sample Counts (for Pending, Completed, and Cancelled status)
 export const getSampleCounts = async (req, res) => {
     try {
-        const pendingCount = await Sample.count({
-            where: { status: 'pending' }
-        });
-        const completedCount = await Sample.count({
-            where: { status: 'complete' }
-        });
-        const cancelledCount = await Sample.count({
-            where: { status: 'cancelled' }
-        });
+        const pendingCount = await Sample.count({ where: { status: 'pending' } });
+        const completedCount = await Sample.count({ where: { status: 'complete' } });
+        const cancelledCount = await Sample.count({ where: { status: 'cancelled' } });
 
-        res.status(200).json({
-            pending: pendingCount,
-            completed: completedCount,
-            cancelled: cancelledCount
-        });
+        res.status(200).json({ pending: pendingCount, completed: completedCount, cancelled: cancelledCount });
     } catch (error) {
-        console.error('Error fetching sample counts:', error)
+        console.error("Error fetching sample counts:", error);
         res.status(500).json({ msg: 'Error fetching sample counts' });
     }
 };
