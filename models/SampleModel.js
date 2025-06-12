@@ -1,8 +1,7 @@
-// models/Sample.js
 import { Sequelize } from 'sequelize';
 import db from '../config/database.js';
 import Users from './UserModel.js';
-import namaBahan from './namaBahan.js'; // Import namaBahan model
+import namaBahan from './namaBahan.js';
 
 const { DataTypes } = Sequelize;
 
@@ -15,7 +14,11 @@ const Sample = db.define('Sample', {
     },
     userId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: Users,
+            key: 'id'
+        }
     },
     namaUnitPemohon: {
         type: DataTypes.STRING,
@@ -29,8 +32,8 @@ const Sample = db.define('Sample', {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: namaBahan,  // Reference to namaBahan model
-            key: 'id' // Reference to id column in namaBahan
+            model: namaBahan,
+            key: 'id'
         }
     },
     nomorPO: {
@@ -45,37 +48,28 @@ const Sample = db.define('Sample', {
         type: DataTypes.ENUM('pending', 'complete', 'cancelled'),
         allowNull: false
     },
-    // New fields added
     noKendaraan: {
         type: DataTypes.STRING,
-        allowNull: true // Make it nullable if you want
+        allowNull: true
     },
     isiBerat: {
         type: DataTypes.FLOAT,
-        allowNull: true // Nullable if you want
+        allowNull: true
     },
     jumlahContoh: {
         type: DataTypes.INTEGER,
-        allowNull: true // Nullable if you want
+        allowNull: true
     },
     noKodeContoh: {
         type: DataTypes.STRING,
-        allowNull: true // Nullable if you want
+        allowNull: true
     },
     noSuratPOK: {
         type: DataTypes.STRING,
-        allowNull: true // Nullable if you want
+        allowNull: true
     }
 }, {
     freezeTableName: true
 });
-
-// Relasi: Sample belongs to Users
-Users.hasMany(Sample);
-Sample.belongsTo(Users, { foreignKey: 'userId' });
-
-// Relasi: Sample belongs to namaBahan
-namaBahan.hasMany(Sample);
-Sample.belongsTo(namaBahan, { foreignKey: 'namaBahanId' });
 
 export default Sample;

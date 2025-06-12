@@ -1,7 +1,5 @@
-// models/ParameterInput.js
 import { Sequelize } from 'sequelize';
 import db from '../config/database.js';
-import Sample from './SampleModel.js';
 import Parameter from './parameters.js';
 
 const { DataTypes } = Sequelize;
@@ -12,13 +10,9 @@ const ParameterInput = db.define('ParameterInput', {
     primaryKey: true,
     autoIncrement: true
   },
-  sampleId: {
+  analysisId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: Sample,
-      key: 'id'
-    }
+    allowNull: false
   },
   parameterId: {
     type: DataTypes.INTEGER,
@@ -28,48 +22,31 @@ const ParameterInput = db.define('ParameterInput', {
       key: 'id'
     }
   },
-  v1: {
-    type: DataTypes.FLOAT,
-    allowNull: true
-  },
-  v2: {
-    type: DataTypes.FLOAT,
-    allowNull: true
-  },
-  v3: {
-    type: DataTypes.FLOAT,
-    allowNull: true
-  },
-  faktorPengenceran: {
-    type: DataTypes.FLOAT,
-    allowNull: true
-  },
-  bobotKosong: {
-    type: DataTypes.FLOAT,
-    allowNull: true
-  },
-  bobotSampel: {
-    type: DataTypes.FLOAT,
-    allowNull: true
-  },
-  bobotSetelahPemanasan: {
-    type: DataTypes.FLOAT,
-    allowNull: true
-  },
-  hasil: {
-    type: DataTypes.FLOAT,
-    allowNull: true
-  },
+  inputs: {
+    type: DataTypes.JSON,
+    allowNull: false,
+    validate: {
+      isValidJSON(value) {
+        try {
+          if (typeof value === 'string') {
+            JSON.parse(value);
+          } else {
+            JSON.stringify(value);
+          }
+        } catch (e) {
+          throw new Error('Invalid JSON format for inputs');
+        }
+      }
+    }
+  }
 }, {
-  freezeTableName: true
+  freezeTableName: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['analysisId', 'parameterId']
+    }
+  ]
 });
-
-// Fungsi asosiasi
-ParameterInput.associate = (models) => {
-  ParameterInput.belongsTo(models.Sample, { foreignKey: 'sampleId' });
-  ParameterInput.belongsTo(models.Parameter, { foreignKey: 'parameterId' });
-  // Pastikan ini tidak berada di dalam file sebelum analisis Result diimport
-  ParameterInput.hasMany(models.AnalysisResult, { foreignKey: 'parameterInputId' });
-};
 
 export default ParameterInput;

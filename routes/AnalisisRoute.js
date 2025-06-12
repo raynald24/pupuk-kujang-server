@@ -1,15 +1,23 @@
 import express from 'express';
-import {
-  createAnalysisResult,
-  getAnalysisResultsBySampleId
-} from '../controllers/AnalisaResult.js';
-
-import { verifyUser } from '../middleware/AuthUser.js';
+import { getParameters, saveAnalysis, getAnalysisBySample } from '../controllers/AnalysisResult.js';
 
 const router = express.Router();
 
-// Analysis Result Routes
-router.post('/analysis-result', verifyUser,createAnalysisResult); // Membuat hasil analisa baru
-router.get('/analysis-result/:sampleId',verifyUser, getAnalysisResultsBySampleId); // Mendapatkan hasil analisa berdasarkan sampleId
+// Tambah CORS headers
+router.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
+// Rute untuk ambil parameter berdasarkan namaBahanId
+router.get('/parameters/:namaBahanId', getParameters);
+
+// Rute untuk simpan analisa
+router.post('/', saveAnalysis);
+
+// Rute untuk ambil analisa berdasarkan sample_id
+router.get('/sample/:sampleId', getAnalysisBySample);
 
 export default router;

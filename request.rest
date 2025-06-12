@@ -48,7 +48,7 @@ Content-Type: application/json
 
 {
     "email": "ray@gmail.com",
-    "password": "123456"
+    "password": "111111"
 }
 ###
 //end pont me
@@ -66,13 +66,15 @@ POST http://localhost:5000/samples
 Content-Type: application/json
 
 {
-  "namaUnitPemohon": "Unit C",
-  "tanggalSurat": "2025-04-08",
-  "namaBahan": "Clay",
-  "nomorPO": "PO12345",
-  "nomorSurat": "Sufvbjsngvfs",
-  "status": "pending"
+    "namaUnitPemohon": "Unit A",
+    "tanggalSurat": "2025-04-30",
+    "namaBahanId": 3,
+    "nomorPO": "PO555",
+    "nomorSurat": "SURAT555",
+    "status": "pending"
 }
+
+
 ### get id sample
 GET http://localhost:5000/samples/ae00264d-2acf-4aa0-bb80-e98a2a9700e3
 
@@ -95,3 +97,44 @@ DELETE http://localhost:5000/samples/ae00264d-2acf-4aa0-bb80-e98a2a9700e3
 ###
 //cek API get sample count 
 GET http://localhost:5000/samples/count
+
+
+###
+GET http://localhost:5000/namaBahan
+
+###
+//tes get analisa result 
+GET http://localhost:5000/analysis-result/1
+
+###
+GET /sample/663ad84a-9652-4827-b01f-978a5b72f0cd
+
+### POST analisis
+POST http://localhost:5000/analisis
+Content-Type: application/json
+
+{
+  "sample_id": "ada33b80-09cd-4856-9df9-4247f0ae59fa",
+  "analysis_number": "AN123",
+  "analysis_date": "2025-05-22",
+  "published": false,
+  "parameters": [
+    {
+      "parameter_name": "Kadar H2SO4",
+      "inputs": {
+        "V1": 10,
+        "N1": 0.1,
+        "fp": 1,
+        "BS1": 2
+      },
+      "result": 24.5
+    },
+    {
+      "parameter_name": "Fe",
+      "inputs": {
+        "Fe": 0.5
+      },
+      "result": 0.5
+    }
+  ]
+}

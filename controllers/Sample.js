@@ -2,21 +2,14 @@ import Sample from "../models/SampleModel.js";
 import User from "../models/UserModel.js";
 import namaBahan from "../models/namaBahan.js"; // Import namaBahan model
 import { Op } from "sequelize";
-
 // Get All Samples
 export const getSamples = async (req, res) => {
     try {
         const response = await Sample.findAll({
-            attributes: ['uuid', 'namaUnitPemohon', 'tanggalSurat', 'nomorPO', 'nomorSurat', 'status', 'noKendaraan', 'isiBerat', 'jumlahContoh', 'noKodeContoh', 'noSuratPOK'],
+            attributes: ['uuid', 'namaUnitPemohon', 'tanggalSurat', 'nomorPO', 'nomorSurat', 'status', 'noKendaraan', 'isiBerat', 'jumlahContoh', 'noKodeContoh', 'noSuratPOK', 'namaBahanId'],
             include: [
-                {
-                    model: User,
-                    attributes: ['name', 'email']
-                },
-                {
-                    model: namaBahan,  // Menambahkan relasi dengan namaBahan
-                    attributes: ['namaBahan'] // Mengambil namaBahan dari tabel namaBahan
-                }
+                { model: User, attributes: ['name', 'email'] },
+                { model: namaBahan, attributes: ['namaBahan'] }
             ]
         });
         res.status(200).json(response);
@@ -26,30 +19,18 @@ export const getSamples = async (req, res) => {
     }
 };
 
-// Get Sample by ID
 export const getSampleById = async (req, res) => {
     try {
         const sample = await Sample.findOne({
-            where: { uuid: req.params.id }
-        });
-        if (!sample) return res.status(404).json({ msg: "Sample not found" });
-
-        const response = await Sample.findOne({
-            attributes: ['uuid', 'namaUnitPemohon', 'tanggalSurat', 'nomorPO', 'nomorSurat', 'status', 'noKendaraan', 'isiBerat', 'jumlahContoh', 'noKodeContoh', 'noSuratPOK'],
-            where: { id: sample.id },
+            attributes: ['uuid', 'namaUnitPemohon', 'tanggalSurat', 'nomorPO', 'nomorSurat', 'status', 'noKendaraan', 'isiBerat', 'jumlahContoh', 'noKodeContoh', 'noSuratPOK', 'namaBahanId'],
+            where: { uuid: req.params.id },
             include: [
-                {
-                    model: User,
-                    attributes: ['name', 'email']
-                },
-                {
-                    model: namaBahan, // Menambahkan relasi dengan namaBahan
-                    attributes: ['namaBahan'] // Mengambil namaBahan dari tabel namaBahan
-                }
+                { model: User, attributes: ['name', 'email'] },
+                { model: namaBahan, attributes: ['namaBahan'] }
             ]
         });
-
-        res.status(200).json(response);
+        if (!sample) return res.status(404).json({ msg: "Sample not found" });
+        res.status(200).json(sample);
     } catch (error) {
         console.error("Error fetching sample by ID:", error);
         res.status(500).json({ msg: error.message });
@@ -144,18 +125,23 @@ export const updateSample = async (req, res) => {
     }
 };
 
-// Delete Sample
+// File: controllers/Sample.js
 export const deleteSample = async (req, res) => {
-    try {
-        const sample = await Sample.findOne({ where: { uuid: req.params.id } });
-        if (!sample) return res.status(404).json({ msg: "Sample not found" });
+  try {
+    const sample = await Sample.findOne({ where: { uuid: req.params.id } });
+    if (!sample) return res.status(404).json({ msg: "Sample not found" });
 
-        await sample.destroy();
-        res.status(200).json({ msg: "Sample deleted successfully" });
-    } catch (error) {
-        console.error("Error deleting sample:", error);
-        res.status(500).json({ msg: error.message });
+    await sample.destroy();
+    res.status(200).json({ msg: "Sample deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting sample:", error);
+    if (error.name === 'SequelizeForeignKeyConstraintError') {
+      return res.status(400).json({
+        msg: "Tidak bisa menghapus sample karena masih ada data analisis terkait. Hapus data analisis terlebih dahulu atau hubungi admin."
+      });
     }
+    res.status(500).json({ msg: "Terjadi kesalahan di server. Silakan coba lagi nanti." });
+  }
 };
 
 // Get Sample Counts (for Pending, Completed, and Cancelled status)
